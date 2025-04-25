@@ -26,7 +26,6 @@ search_tool = TavilySearchResults(max_results=3)
 
 # chat history
 memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True,input_key = "input")
-print("memory printing.....",memory)
 
 
 prompt = PromptTemplate.from_template("""
@@ -44,13 +43,6 @@ Based on the following research context, draft a clear and concise answer(If url
 
 """)
 
-# chat_chain = LLMChain(
-#     llm=llm,
-#     prompt=prompt,
-#     memory=memory,
-#     verbose=True
-# )
-# Fix 1: Use LLMChain instead of RunnableSequence (recommended approach)
 chat_chain = LLMChain(
     llm=llm,
     prompt=prompt,
@@ -58,9 +50,6 @@ chat_chain = LLMChain(
     verbose=True
 )
 
-# -----------------------------
-# Define Agent 1: Research Agent
-# -----------------------------
 def research_agent(input_query: str) -> str:
     print("[Research Agent] Gathering information for:", input_query)
     try:
@@ -69,7 +58,6 @@ def research_agent(input_query: str) -> str:
         if isinstance(results, str):
             return f"Search results for '{input_query}':\n{results}"
         
-        # Handle different possible result formats
         if isinstance(results, list):
             extracted_data = []
             for i, r in enumerate(results):
@@ -89,22 +77,6 @@ def research_agent(input_query: str) -> str:
         print(f"Error in research agent: {e}")
         return f"Error searching for '{input_query}': {str(e)}"
 
-# -----------------------------
-# Define Agent 2: Answer Drafting Agent
-# -----------------------------
-# def answer_drafting_agent(context: str) -> str:
-#     print("[Drafting Agent] Drafting answer based on research context.")
-#     prompt = f"""
-#     Based on the following research context, draft a clear and concise answer(If urls or links present also include that too):
-
-#     {context}
-
-#     Ensure the answer is informative and well-organized.
-#     """
-#     return llm.invoke(prompt).content
-
-# def answer_drafting_agent(context: str) -> str:
-#     return chat_chain.run(input=context)
 def answer_drafting_agent(context: str) -> str:
     try:
         result = chat_chain.invoke({"input": context})
@@ -113,9 +85,6 @@ def answer_drafting_agent(context: str) -> str:
         print(f"Error in drafting agent: {e}")
         return f"Failed to generate answer. Error: {str(e)}"
 
-# -----------------------------
-# LangGraph State Machine Setup
-# -----------------------------
 from typing import TypedDict
 
 class GraphState(TypedDict):
@@ -146,14 +115,7 @@ workflow.add_edge("draft", END)
 # Compile the graph
 app = workflow.compile()
 
-# -----------------------------
-# Main Execution Interface
-# -----------------------------
 if __name__ == "__main__":
-    # user_query = input("Enter your research topic or question: ")
-    # result = app.invoke({"query": user_query, "research_data": "", "drafted_answer": ""})
-    # print("\nFinal Drafted Answer:\n")
-    # print(result["drafted_answer"])
     while True:
         user_query = input("Enter your research topic or type 'exit': ")
         if user_query.lower() == "exit":
