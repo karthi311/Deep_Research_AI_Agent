@@ -1,0 +1,7 @@
+langchain-core==0.3.56
+langchain-community==0.0.31
+langgraph==0.3.31
+langchain-groq==0.3.2
+python-dotenv
+tavily-python
+langchain==0.3.24
